@@ -1,0 +1,11 @@
+{
+  "title": "TCP Congestion Control: How cwnd Moves",
+  "slides": [
+    {"title":"Two limits on sending","description":"A sender keeps at most min(cwnd, rwnd) bytes unacknowledged. The receiver sets rwnd; the sender guesses cwnd from loss.","rows":[["rwnd","receiver's free buffer"],["cwnd","sender's estimate of path capacity"],["In flight","min(cwnd, rwnd)"]]},
+    {"title":"Slow start","description":"Every ACK adds 1 MSS to cwnd, so cwnd doubles each round trip until it reaches ssthresh or a loss is detected.","code":"cwnd: 1 → 2 → 4 → 8 → 16 MSS","rows":[["Growth","× 2 per RTT"],["Loss","slide 4 or slide 5"]]},
+    {"title":"Congestion avoidance","description":"Above ssthresh, growth becomes additive: about 1 MSS per round trip, probing slowly for spare capacity.","code":"per ACK: cwnd += MSS × MSS / cwnd","rows":[["Growth","+1 MSS per RTT"],["Loss","slide 4 or slide 5"]]},
+    {"title":"3 duplicate ACKs","description":"Duplicate ACKs mean one segment is missing but later ones arrived, so the path still works. Reno retransmits at once.","rows":[["ssthresh","cwnd / 2"],["cwnd","ssthresh + 3 MSS, then ssthresh"],["After recovery","back to slide 3, no slow start"]]},
+    {"title":"Timeout: the hard reset","description":"A retransmission timeout means ACKs stopped arriving. The sender assumes heavy congestion and restarts small.","rows":[["ssthresh","cwnd / 2"],["cwnd","1 MSS"],["Restart","back to slide 2"]]},
+    {"title":"Worked example","description":"Start with cwnd 1 MSS and ssthresh 16. At cwnd 20, three duplicate ACKs arrive; no timeout happens.","code":"1 2 4 8 16 17 18 19 20 | 10 11","rows":[["RTT 1-5","slow start up to 16"],["RTT 6-9","+1 per RTT up to 20"],["After loss","ssthresh 10, cwnd 10"]]}
+  ]
+}
