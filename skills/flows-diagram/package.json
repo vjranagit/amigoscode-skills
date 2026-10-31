@@ -1,7 +1,7 @@
 {
   "name": "flows-diagram",
   "version": "1.0.0",
-  "description": "Animated Amigoscode backend flow diagrams: square MP4, looping GIF, and a branded reel with voiceover and captions.",
+  "description": "Animated backend flow diagrams: square MP4, looping GIF, and a reel with voiceover and captions. Unbranded by default (BRANDING=1 for the Amigoscode frame).",
   "private": true,
   "type": "commonjs",
   "license": "MIT",

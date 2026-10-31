@@ -20,7 +20,7 @@ node $SKILL/scripts/make.mjs <projectDir> <sceneFile> <outBase> "<Title>" "<EYEB
 - `<outBase>` — output basename. Outputs land in `<projectDir>/`:
   - `<outBase>.mp4` — 1440x1440 square
   - `<outBase>.gif` — 960x960 infinite loop
-  - `<outBase>-reel.mp4` — 1080x1920 branded reel
+  - `<outBase>-reel.mp4` — 1080x1920 reel (unbranded unless `BRANDING=1`)
 - `<Title>` — big headline (shown on square + reel). Title Case, no dashes.
 - `<EYEBROW>` — small uppercase kicker above the title, e.g. `APACHE KAFKA`.
 - `<caption>` — small monospace line under the reel diagram only (the square ignores it; pass
@@ -30,6 +30,7 @@ node $SKILL/scripts/make.mjs <projectDir> <sceneFile> <outBase> "<Title>" "<EYEB
 
 | Var | Default | Meaning |
 |---|---|---|
+| `BRANDING` | unset (off) | Fork patch. Unset = no Amigoscode mark/wordmark anywhere (layout shifts up to use the space). `1`/`on`/`true` = original branded frame with purple mark top and wordmark bottom. |
 | `FLOWS_DIR` | see below | Workspace holding the `<name>-flow/` folders. Falls back to `workspaceDir` in `~/amigoscode-skills/flows-diagram-config.json`, then `~/flows`, then `~/amigoscode-skills/flows`. |
 | `CHROME_PATH` | auto | Chrome/Chromium binary used for rendering. |
 | `MODE` | `full` | `check` = render ONE mid-timeline frame to `$FLOWS/.work/<outBase>/<outBase>-check.png` (fast layout check). Always use this while dialing in the diagram + crop. |

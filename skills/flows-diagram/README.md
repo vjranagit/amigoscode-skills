@@ -1,6 +1,6 @@
 # flows-diagram
 
-Turn one backend concept into a **branded animated diagram**: a React/SVG scene animated across
+Turn one backend concept into an **animated diagram** (unbranded by default, `BRANDING=1` restores the Amigoscode frame): a React/SVG scene animated across
 10 seconds and rendered three ways from a single command, then voiced, captioned, and titled.
 
 Built on headless Chrome (puppeteer-core) + ffmpeg. Deterministic: the timeline is stepped to
@@ -10,7 +10,7 @@ exact timestamps, so renders are repeatable.
 
 ```
 $FLOWS/<name>-flow/
-├── <base>.mp4                    ← 1440x1440 square, branded frame
+├── <base>.mp4                    ← 1440x1440 square
 ├── <base>.gif                    ← 960x960 infinite loop
 ├── <base>-reel.mp4               ← 1080x1920 vertical reel
 ├── <base>-reel-voice-over.mp4    ← the reel with voiceover + word-by-word captions
@@ -59,7 +59,7 @@ cp "$SKILL/assets/template/example-scene.jsx" outbox-flow/outbox-scene.jsx   # t
 MODE=check node "$SKILL/scripts/make.mjs" outbox-flow outbox-scene.jsx outbox \
   "How the Outbox Pattern Works" "DISTRIBUTED TX" "x"
 
-# full render: square mp4 + looping gif + branded reel
+# full render: square mp4 + looping gif + reel
 CROP_TOP=150 CROP_BOTTOM=140 node "$SKILL/scripts/make.mjs" outbox-flow outbox-scene.jsx outbox \
   "How the Outbox Pattern Works" "DISTRIBUTED TX" "Write → Outbox → Relay → Broker"
 ```
@@ -89,8 +89,8 @@ flows-diagram/
 │   ├── caption-render.mjs    # Submagic-style caption overlay frames
 │   └── paths.mjs             # workspace / Chrome / key / cache resolution
 ├── assets/
-│   ├── logo-mark.svg         # purple mark (top of every frame)
-│   ├── amigoscode-logo*.png  # wordmarks
+│   ├── logo-mark.svg         # purple mark (only drawn when BRANDING=1)
+│   ├── amigoscode-logo*.png  # wordmarks (only drawn when BRANDING=1)
 │   └── template/             # animations.jsx + example scene to copy
 └── references/
     ├── pipeline.md           # make.mjs contract, env vars, tuned render matrix

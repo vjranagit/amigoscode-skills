@@ -28,6 +28,10 @@ const puppeteer = require('puppeteer-core');
 const CHROME = chromePath();
 const LOGO = path.join(ASSETS_DIR, 'amigoscode-logo.png');       // white wordmark (bottom)
 const MARK = path.join(ASSETS_DIR, 'logo-mark.svg');             // purple mark (top)
+// FORK PATCH (nobrand-default): the Amigoscode mark and wordmark are OFF by default.
+// Opt in with BRANDING=1. The MIT notice stays in LICENSE; it is just not rendered into images.
+// See FORK-NOBRAND.md.
+const BRANDING = /^(1|on|true|yes|amigoscode)$/i.test(process.env.BRANDING || '');
 
 const MODE = process.env.MODE || 'full';
 const [projArg, sceneFile, outBase, TITLE, EYEBROW, CAPTION] = process.argv.slice(2);
@@ -47,9 +51,14 @@ const react = fs.readFileSync(path.join(CACHE_DIR, 'react.js'), 'utf8');
 const reactDom = fs.readFileSync(path.join(CACHE_DIR, 'react-dom.js'), 'utf8');
 const animations = fs.readFileSync(path.join(projectDir, 'animations.jsx'), 'utf8');
 const scene = fs.readFileSync(path.join(projectDir, sceneFile), 'utf8');
-const logoData = 'data:image/png;base64,' + fs.readFileSync(LOGO).toString('base64');
-const logoInkData = 'data:image/png;base64,' + fs.readFileSync(path.join(ASSETS_DIR, 'amigoscode-logo-ink.png')).toString('base64');
-const markData = 'data:image/svg+xml;base64,' + fs.readFileSync(MARK).toString('base64');
+// Brand assets are only read, and only embedded in the page, when BRANDING is on.
+const logoInkData = BRANDING ? 'data:image/png;base64,' + fs.readFileSync(path.join(ASSETS_DIR, 'amigoscode-logo-ink.png')).toString('base64') : '';
+const markData = BRANDING ? 'data:image/svg+xml;base64,' + fs.readFileSync(MARK).toString('base64') : '';
+const MARK_IMG = BRANDING ? `<img class="mark" src="${markData}">` : '';
+const LOGO_IMG = BRANDING ? `<img class="wordmark" src="${logoInkData}">` : '';
+const REEL_LOGO_IMG = BRANDING ? `<img class="logo" src="${logoInkData}">` : '';
+// Unbranded: no mark/wordmark, so pull the header and diagram up into the freed space.
+const SHIFT_L = BRANDING ? 0 : 120, SHIFT_R = BRANDING ? 0 : 200;
 
 const opts = { presets: [[Babel.availablePresets['react'], { runtime: 'classic' }]] };
 const compile = (code, name) => Babel.transform(code, { ...opts, filename: name }).code;
@@ -82,7 +91,7 @@ const CROP_TOP = +(process.env.CROP_TOP || 0), CROP_BOTTOM = +(process.env.CROP_
 const CARD_H = 960 - CROP_TOP - CROP_BOTTOM;
 // header (mark + eyebrow + title) pinned near the top, diagram top-aligned just
 // below the title so it hugs the header, wordmark pinned near the bottom.
-const CARD_TOP = 372;
+const CARD_TOP = 372 - SHIFT_L;
 const landscapeHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@100..900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -94,7 +103,7 @@ const landscapeHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
     shows through continuously — mark, header, diagram and footer share one bg. */
  #stage svg rect[fill="url(#bgGrad)"]{fill:transparent !important;}
  .mark{position:absolute;top:74px;left:50%;transform:translateX(-50%);width:104px;height:104px;}
- .header{position:absolute;top:256px;left:0;right:0;text-align:center;padding:0 100px;}
+ .header{position:absolute;top:${256 - SHIFT_L}px;left:0;right:0;text-align:center;padding:0 100px;}
  .eyebrow{color:#7F56D9;font-size:23px;font-weight:700;letter-spacing:8px;text-transform:uppercase;margin:0 0 14px;}
  .title{color:#20273e;font-size:54px;font-weight:800;line-height:1.05;letter-spacing:-1px;margin:0;}
  .card{position:absolute;top:${CARD_TOP}px;left:0;width:${LW}px;height:${CARD_H}px;overflow:hidden;}
@@ -104,10 +113,10 @@ const landscapeHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
  .wordmark{width:286px;opacity:0.94;}
 </style></head><body>
 <div id="frame">
- <img class="mark" src="${markData}">
+ ${MARK_IMG}
  <div class="header"><p class="eyebrow">${EYEBROW || ''}</p><h1 class="title">${TITLE || ''}</h1></div>
  <div class="card"><div id="stage"></div></div>
- <div class="footer"><img class="wordmark" src="${logoInkData}"></div>
+ <div class="footer">${LOGO_IMG}</div>
 </div>${scripts}<script>${mountFor(DURATION)}</script></body></html>`;
 
 const reelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
@@ -122,21 +131,21 @@ const reelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
  .glow{position:absolute;left:50%;top:52%;width:1240px;height:1240px;transform:translate(-50%,-50%);
    background:radial-gradient(circle, rgba(127,86,217,0.12), rgba(127,86,217,0) 60%);}
  .mark{position:absolute;top:104px;left:50%;transform:translateX(-50%);width:132px;height:132px;}
- .top{position:absolute;top:392px;left:0;right:0;text-align:center;padding:0 80px;}
+ .top{position:absolute;top:${392 - SHIFT_R}px;left:0;right:0;text-align:center;padding:0 80px;}
  .eyebrow{color:#7F56D9;font-size:30px;font-weight:700;letter-spacing:9px;text-transform:uppercase;margin:0 0 20px;}
  .title{color:#20273e;font-size:78px;font-weight:800;line-height:1.05;letter-spacing:-1.5px;margin:0;}
- .card{position:absolute;left:0;top:660px;width:1080px;height:720px;overflow:hidden;}
+ .card{position:absolute;left:0;top:${660 - SHIFT_R}px;width:1080px;height:720px;overflow:hidden;}
  .card svg{display:block;width:1080px;height:720px;}
- .caption{position:absolute;top:1452px;left:0;right:0;text-align:center;color:#7a7296;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+ .caption{position:absolute;top:${1452 - SHIFT_R}px;left:0;right:0;text-align:center;color:#7a7296;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;}
  .logo{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);width:430px;opacity:0.95;}
 </style></head><body>
 <div id="reel">
  <div class="glow"></div>
- <img class="mark" src="${markData}">
+ ${MARK_IMG}
  <div class="top"><p class="eyebrow">${EYEBROW || ''}</p><h1 class="title">${TITLE || ''}</h1></div>
  <div class="card"><div id="stage"></div></div>
  <div class="caption">${CAPTION || ''}</div>
- <img class="logo" src="${logoInkData}">
+ ${REEL_LOGO_IMG}
 </div>${scripts}<script>${mountFor(DURATION)}</script></body></html>`;
 
 async function capture(html, { w, h, scale, sel, framesDir }) {
