@@ -1,12 +1,12 @@
 ---
 name: flows-diagram
-description: "Produce a branded Amigoscode animated BACKEND-DIAGRAM video: a React/SVG flow diagram (controllers, queues, threads, caches, DB cylinders, arrows, packets) animated over 10s and rendered to a 1440x1440 square MP4, a 960x960 looping GIF, and a 1080x1920 branded reel, then optionally given an ElevenLabs voiceover, word-by-word captions with animated emojis, an infographic-style caption.txt, and an upload title.txt. Use whenever the user wants an animated backend, Java, Spring, database, or concurrency DIAGRAM, flow, or 'how X works' reel, or to add a voiceover, captions, or a title to one of these diagrams. Examples: 'make a flows diagram for the outbox pattern', 'add a diagram about backpressure', 'render the square + reel for saga', 'give the retry diagram a voiceover and captions', 'generate title.txt for these'. This is the SVG-scene pipeline (make.mjs + puppeteer + ffmpeg). It is NOT the HyperFrames explainer-video skill and NOT the CSV reel skill."
+description: "Produce an animated BACKEND-DIAGRAM video (no logo or watermark unless BRANDING=1): a React/SVG flow diagram (controllers, queues, threads, caches, DB cylinders, arrows, packets) animated over 10s and rendered to a 1440x1440 square MP4, a 960x960 looping GIF, and a 1080x1920 branded reel, then optionally given an ElevenLabs voiceover, word-by-word captions with animated emojis, an infographic-style caption.txt, and an upload title.txt. Use whenever the user wants an animated backend, Java, Spring, database, or concurrency DIAGRAM, flow, or 'how X works' reel, or to add a voiceover, captions, or a title to one of these diagrams. Examples: 'make a flows diagram for the outbox pattern', 'add a diagram about backpressure', 'render the square + reel for saga', 'give the retry diagram a voiceover and captions', 'generate title.txt for these'. This is the SVG-scene pipeline (make.mjs + puppeteer + ffmpeg). It is NOT the HyperFrames explainer-video skill and NOT the CSV reel skill."
 license: MIT
 ---
 
 # Flows diagram
 
-Turn one backend concept into a set of branded animated diagrams. Every diagram is a self
+Turn one backend concept into a set of animated diagrams (no logo or watermark by default; see FORK-NOBRAND.md). Every diagram is a self
 contained React/SVG scene animated across 10 seconds and rendered three ways from one command,
 then voiced, captioned, and titled. The voiced, captioned reel is part of the standard
 deliverable, not an afterthought.
@@ -69,11 +69,13 @@ check frame first.
 
 - **Palette**: purple `#7f56d9` primary, teal `#2FA39B` secondary/success, red `#E5484D`
   failure. Ink text `#20273e`. The scene template's `C` object already holds these.
-- **Layout is locked** in `make.mjs`: purple mark at top, eyebrow + title pinned near the top,
-  the diagram in the middle, ink wordmark pinned at the bottom. Do not restyle the frame; only
-  the diagram inside `#stage` changes.
+- **No branding by default.** `make.mjs` draws NO Amigoscode mark, wordmark or logo of any kind
+  unless `BRANDING=1` is set. Never add a logo, watermark, brand name or brand sign-off to a scene,
+  title, caption or voiceover on your own. Layout is locked in `make.mjs`: eyebrow + title pinned
+  near the top, the diagram below it. Do not restyle the frame; only the diagram inside `#stage`
+  changes. With `BRANDING=1` the purple mark goes on top and the ink wordmark at the bottom.
 - **Center the diagram between the title and the footer.** This is the look we want: roughly
-  equal breathing room above the diagram (below the title) and below it (above the wordmark), not
+  equal breathing room above the diagram (below the title) and below it (above the footer area), not
   jammed against the title with a big empty gap below. `CROP_TOP`/`CROP_BOTTOM` are how you land
   it: a tall diagram fills the body naturally, but a short or single-row diagram needs a *smaller*
   `CROP_TOP` so it drops into the vertical middle. Always confirm the balance on the `MODE=check`

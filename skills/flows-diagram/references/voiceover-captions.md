@@ -41,7 +41,7 @@ Senior engineers <...>
 
 Share your thoughts below
 
-Follow Amigoscode for lessons that turn developers into senior engineers
+<optional sign-off: NONE by default. Do not write a brand name or follow line. Only if BRANDING=1: Follow Amigoscode for lessons that turn developers into senior engineers>
 ```
 
 ## vo-script.txt (the narration)
@@ -61,7 +61,7 @@ Reference:
 
 Three node scripts in `$SKILL/scripts/`, then one ffmpeg composite. Run them from the workspace
 `$FLOWS`. The ElevenLabs API key is read from `$ELEVEN_LABS`, then `$SKILL/.env`, then `~/.env`;
-never print it. Default voice is the Amigoscode brand voice `BtWabtumIemAotTjP5sk` (override with
+never print it. Default voice is the configured ElevenLabs voice `BtWabtumIemAotTjP5sk` (spoken audio only; never name the brand in the script) (override with
 `VOICE_ID=`, or `voiceId` in `~/amigoscode-skills/flows-diagram-config.json`).
 
 ```zsh

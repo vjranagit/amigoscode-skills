@@ -1,0 +1,225 @@
+diff --git a/skills/flows-diagram/README.md b/skills/flows-diagram/README.md
+index 0e573b2..cd50c97 100644
+--- a/skills/flows-diagram/README.md
++++ b/skills/flows-diagram/README.md
+@@ -1,6 +1,6 @@
+ # flows-diagram
+ 
+-Turn one backend concept into a **branded animated diagram**: a React/SVG scene animated across
++Turn one backend concept into an **animated diagram** (unbranded by default, `BRANDING=1` restores the Amigoscode frame): a React/SVG scene animated across
+ 10 seconds and rendered three ways from a single command, then voiced, captioned, and titled.
+ 
+ Built on headless Chrome (puppeteer-core) + ffmpeg. Deterministic: the timeline is stepped to
+@@ -10,7 +10,7 @@ exact timestamps, so renders are repeatable.
+ 
+ ```
+ $FLOWS/<name>-flow/
+-├── <base>.mp4                    ← 1440x1440 square, branded frame
++├── <base>.mp4                    ← 1440x1440 square
+ ├── <base>.gif                    ← 960x960 infinite loop
+ ├── <base>-reel.mp4               ← 1080x1920 vertical reel
+ ├── <base>-reel-voice-over.mp4    ← the reel with voiceover + word-by-word captions
+@@ -59,7 +59,7 @@ cp "$SKILL/assets/template/example-scene.jsx" outbox-flow/outbox-scene.jsx   # t
+ MODE=check node "$SKILL/scripts/make.mjs" outbox-flow outbox-scene.jsx outbox \
+   "How the Outbox Pattern Works" "DISTRIBUTED TX" "x"
+ 
+-# full render: square mp4 + looping gif + branded reel
++# full render: square mp4 + looping gif + reel
+ CROP_TOP=150 CROP_BOTTOM=140 node "$SKILL/scripts/make.mjs" outbox-flow outbox-scene.jsx outbox \
+   "How the Outbox Pattern Works" "DISTRIBUTED TX" "Write → Outbox → Relay → Broker"
+ ```
+@@ -89,8 +89,8 @@ flows-diagram/
+ │   ├── caption-render.mjs    # Submagic-style caption overlay frames
+ │   └── paths.mjs             # workspace / Chrome / key / cache resolution
+ ├── assets/
+-│   ├── logo-mark.svg         # purple mark (top of every frame)
+-│   ├── amigoscode-logo*.png  # wordmarks
++│   ├── logo-mark.svg         # purple mark (only drawn when BRANDING=1)
++│   ├── amigoscode-logo*.png  # wordmarks (only drawn when BRANDING=1)
+ │   └── template/             # animations.jsx + example scene to copy
+ └── references/
+     ├── pipeline.md           # make.mjs contract, env vars, tuned render matrix
+diff --git a/skills/flows-diagram/SKILL.md b/skills/flows-diagram/SKILL.md
+index 8ae6b0f..e46c2c7 100644
+--- a/skills/flows-diagram/SKILL.md
++++ b/skills/flows-diagram/SKILL.md
+@@ -1,12 +1,12 @@
+ ---
+ name: flows-diagram
+-description: "Produce a branded Amigoscode animated BACKEND-DIAGRAM video: a React/SVG flow diagram (controllers, queues, threads, caches, DB cylinders, arrows, packets) animated over 10s and rendered to a 1440x1440 square MP4, a 960x960 looping GIF, and a 1080x1920 branded reel, then optionally given an ElevenLabs voiceover, word-by-word captions with animated emojis, an infographic-style caption.txt, and an upload title.txt. Use whenever the user wants an animated backend, Java, Spring, database, or concurrency DIAGRAM, flow, or 'how X works' reel, or to add a voiceover, captions, or a title to one of these diagrams. Examples: 'make a flows diagram for the outbox pattern', 'add a diagram about backpressure', 'render the square + reel for saga', 'give the retry diagram a voiceover and captions', 'generate title.txt for these'. This is the SVG-scene pipeline (make.mjs + puppeteer + ffmpeg). It is NOT the HyperFrames explainer-video skill and NOT the CSV reel skill."
++description: "Produce an animated BACKEND-DIAGRAM video (no logo or watermark unless BRANDING=1): a React/SVG flow diagram (controllers, queues, threads, caches, DB cylinders, arrows, packets) animated over 10s and rendered to a 1440x1440 square MP4, a 960x960 looping GIF, and a 1080x1920 branded reel, then optionally given an ElevenLabs voiceover, word-by-word captions with animated emojis, an infographic-style caption.txt, and an upload title.txt. Use whenever the user wants an animated backend, Java, Spring, database, or concurrency DIAGRAM, flow, or 'how X works' reel, or to add a voiceover, captions, or a title to one of these diagrams. Examples: 'make a flows diagram for the outbox pattern', 'add a diagram about backpressure', 'render the square + reel for saga', 'give the retry diagram a voiceover and captions', 'generate title.txt for these'. This is the SVG-scene pipeline (make.mjs + puppeteer + ffmpeg). It is NOT the HyperFrames explainer-video skill and NOT the CSV reel skill."
+ license: MIT
+ ---
+ 
+ # Flows diagram
+ 
+-Turn one backend concept into a set of branded animated diagrams. Every diagram is a self
++Turn one backend concept into a set of animated diagrams (no logo or watermark by default; see FORK-NOBRAND.md). Every diagram is a self
+ contained React/SVG scene animated across 10 seconds and rendered three ways from one command,
+ then voiced, captioned, and titled. The voiced, captioned reel is part of the standard
+ deliverable, not an afterthought.
+@@ -69,11 +69,13 @@ check frame first.
+ 
+ - **Palette**: purple `#7f56d9` primary, teal `#2FA39B` secondary/success, red `#E5484D`
+   failure. Ink text `#20273e`. The scene template's `C` object already holds these.
+-- **Layout is locked** in `make.mjs`: purple mark at top, eyebrow + title pinned near the top,
+-  the diagram in the middle, ink wordmark pinned at the bottom. Do not restyle the frame; only
+-  the diagram inside `#stage` changes.
++- **No branding by default.** `make.mjs` draws NO Amigoscode mark, wordmark or logo of any kind
++  unless `BRANDING=1` is set. Never add a logo, watermark, brand name or brand sign-off to a scene,
++  title, caption or voiceover on your own. Layout is locked in `make.mjs`: eyebrow + title pinned
++  near the top, the diagram below it. Do not restyle the frame; only the diagram inside `#stage`
++  changes. With `BRANDING=1` the purple mark goes on top and the ink wordmark at the bottom.
+ - **Center the diagram between the title and the footer.** This is the look we want: roughly
+-  equal breathing room above the diagram (below the title) and below it (above the wordmark), not
++  equal breathing room above the diagram (below the title) and below it (above the footer area), not
+   jammed against the title with a big empty gap below. `CROP_TOP`/`CROP_BOTTOM` are how you land
+   it: a tall diagram fills the body naturally, but a short or single-row diagram needs a *smaller*
+   `CROP_TOP` so it drops into the vertical middle. Always confirm the balance on the `MODE=check`
+diff --git a/skills/flows-diagram/package.json b/skills/flows-diagram/package.json
+index 3843cea..4b6ca8d 100644
+--- a/skills/flows-diagram/package.json
++++ b/skills/flows-diagram/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "flows-diagram",
+   "version": "1.0.0",
+-  "description": "Animated Amigoscode backend flow diagrams: square MP4, looping GIF, and a branded reel with voiceover and captions.",
++  "description": "Animated backend flow diagrams: square MP4, looping GIF, and a reel with voiceover and captions. Unbranded by default (BRANDING=1 for the Amigoscode frame).",
+   "private": true,
+   "type": "commonjs",
+   "license": "MIT",
+diff --git a/skills/flows-diagram/references/pipeline.md b/skills/flows-diagram/references/pipeline.md
+index 46fddfc..5482087 100644
+--- a/skills/flows-diagram/references/pipeline.md
++++ b/skills/flows-diagram/references/pipeline.md
+@@ -20,7 +20,7 @@ node $SKILL/scripts/make.mjs <projectDir> <sceneFile> <outBase> "<Title>" "<EYEB
+ - `<outBase>` — output basename. Outputs land in `<projectDir>/`:
+   - `<outBase>.mp4` — 1440x1440 square
+   - `<outBase>.gif` — 960x960 infinite loop
+-  - `<outBase>-reel.mp4` — 1080x1920 branded reel
++  - `<outBase>-reel.mp4` — 1080x1920 reel (unbranded unless `BRANDING=1`)
+ - `<Title>` — big headline (shown on square + reel). Title Case, no dashes.
+ - `<EYEBROW>` — small uppercase kicker above the title, e.g. `APACHE KAFKA`.
+ - `<caption>` — small monospace line under the reel diagram only (the square ignores it; pass
+@@ -30,6 +30,7 @@ node $SKILL/scripts/make.mjs <projectDir> <sceneFile> <outBase> "<Title>" "<EYEB
+ 
+ | Var | Default | Meaning |
+ |---|---|---|
++| `BRANDING` | unset (off) | Fork patch. Unset = no Amigoscode mark/wordmark anywhere (layout shifts up to use the space). `1`/`on`/`true` = original branded frame with purple mark top and wordmark bottom. |
+ | `FLOWS_DIR` | see below | Workspace holding the `<name>-flow/` folders. Falls back to `workspaceDir` in `~/amigoscode-skills/flows-diagram-config.json`, then `~/flows`, then `~/amigoscode-skills/flows`. |
+ | `CHROME_PATH` | auto | Chrome/Chromium binary used for rendering. |
+ | `MODE` | `full` | `check` = render ONE mid-timeline frame to `$FLOWS/.work/<outBase>/<outBase>-check.png` (fast layout check). Always use this while dialing in the diagram + crop. |
+diff --git a/skills/flows-diagram/references/voiceover-captions.md b/skills/flows-diagram/references/voiceover-captions.md
+index b09a35a..28213e5 100644
+--- a/skills/flows-diagram/references/voiceover-captions.md
++++ b/skills/flows-diagram/references/voiceover-captions.md
+@@ -41,7 +41,7 @@ Senior engineers <...>
+ 
+ Share your thoughts below
+ 
+-Follow Amigoscode for lessons that turn developers into senior engineers
++<optional sign-off: NONE by default. Do not write a brand name or follow line. Only if BRANDING=1: Follow Amigoscode for lessons that turn developers into senior engineers>
+ ```
+ 
+ ## vo-script.txt (the narration)
+@@ -61,7 +61,7 @@ Reference:
+ 
+ Three node scripts in `$SKILL/scripts/`, then one ffmpeg composite. Run them from the workspace
+ `$FLOWS`. The ElevenLabs API key is read from `$ELEVEN_LABS`, then `$SKILL/.env`, then `~/.env`;
+-never print it. Default voice is the Amigoscode brand voice `BtWabtumIemAotTjP5sk` (override with
++never print it. Default voice is the configured ElevenLabs voice `BtWabtumIemAotTjP5sk` (spoken audio only; never name the brand in the script) (override with
+ `VOICE_ID=`, or `voiceId` in `~/amigoscode-skills/flows-diagram-config.json`).
+ 
+ ```zsh
+diff --git a/skills/flows-diagram/scripts/make.mjs b/skills/flows-diagram/scripts/make.mjs
+index d050fec..e05da0f 100644
+--- a/skills/flows-diagram/scripts/make.mjs
++++ b/skills/flows-diagram/scripts/make.mjs
+@@ -28,6 +28,10 @@ const puppeteer = require('puppeteer-core');
+ const CHROME = chromePath();
+ const LOGO = path.join(ASSETS_DIR, 'amigoscode-logo.png');       // white wordmark (bottom)
+ const MARK = path.join(ASSETS_DIR, 'logo-mark.svg');             // purple mark (top)
++// FORK PATCH (nobrand-default): the Amigoscode mark and wordmark are OFF by default.
++// Opt in with BRANDING=1. The MIT notice stays in LICENSE; it is just not rendered into images.
++// See FORK-NOBRAND.md.
++const BRANDING = /^(1|on|true|yes|amigoscode)$/i.test(process.env.BRANDING || '');
+ 
+ const MODE = process.env.MODE || 'full';
+ const [projArg, sceneFile, outBase, TITLE, EYEBROW, CAPTION] = process.argv.slice(2);
+@@ -47,9 +51,14 @@ const react = fs.readFileSync(path.join(CACHE_DIR, 'react.js'), 'utf8');
+ const reactDom = fs.readFileSync(path.join(CACHE_DIR, 'react-dom.js'), 'utf8');
+ const animations = fs.readFileSync(path.join(projectDir, 'animations.jsx'), 'utf8');
+ const scene = fs.readFileSync(path.join(projectDir, sceneFile), 'utf8');
+-const logoData = 'data:image/png;base64,' + fs.readFileSync(LOGO).toString('base64');
+-const logoInkData = 'data:image/png;base64,' + fs.readFileSync(path.join(ASSETS_DIR, 'amigoscode-logo-ink.png')).toString('base64');
+-const markData = 'data:image/svg+xml;base64,' + fs.readFileSync(MARK).toString('base64');
++// Brand assets are only read, and only embedded in the page, when BRANDING is on.
++const logoInkData = BRANDING ? 'data:image/png;base64,' + fs.readFileSync(path.join(ASSETS_DIR, 'amigoscode-logo-ink.png')).toString('base64') : '';
++const markData = BRANDING ? 'data:image/svg+xml;base64,' + fs.readFileSync(MARK).toString('base64') : '';
++const MARK_IMG = BRANDING ? `<img class="mark" src="${markData}">` : '';
++const LOGO_IMG = BRANDING ? `<img class="wordmark" src="${logoInkData}">` : '';
++const REEL_LOGO_IMG = BRANDING ? `<img class="logo" src="${logoInkData}">` : '';
++// Unbranded: no mark/wordmark, so pull the header and diagram up into the freed space.
++const SHIFT_L = BRANDING ? 0 : 120, SHIFT_R = BRANDING ? 0 : 200;
+ 
+ const opts = { presets: [[Babel.availablePresets['react'], { runtime: 'classic' }]] };
+ const compile = (code, name) => Babel.transform(code, { ...opts, filename: name }).code;
+@@ -82,7 +91,7 @@ const CROP_TOP = +(process.env.CROP_TOP || 0), CROP_BOTTOM = +(process.env.CROP_
+ const CARD_H = 960 - CROP_TOP - CROP_BOTTOM;
+ // header (mark + eyebrow + title) pinned near the top, diagram top-aligned just
+ // below the title so it hugs the header, wordmark pinned near the bottom.
+-const CARD_TOP = 372;
++const CARD_TOP = 372 - SHIFT_L;
+ const landscapeHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
+ <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@100..900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+ <style>
+@@ -94,7 +103,7 @@ const landscapeHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
+     shows through continuously — mark, header, diagram and footer share one bg. */
+  #stage svg rect[fill="url(#bgGrad)"]{fill:transparent !important;}
+  .mark{position:absolute;top:74px;left:50%;transform:translateX(-50%);width:104px;height:104px;}
+- .header{position:absolute;top:256px;left:0;right:0;text-align:center;padding:0 100px;}
++ .header{position:absolute;top:${256 - SHIFT_L}px;left:0;right:0;text-align:center;padding:0 100px;}
+  .eyebrow{color:#7F56D9;font-size:23px;font-weight:700;letter-spacing:8px;text-transform:uppercase;margin:0 0 14px;}
+  .title{color:#20273e;font-size:54px;font-weight:800;line-height:1.05;letter-spacing:-1px;margin:0;}
+  .card{position:absolute;top:${CARD_TOP}px;left:0;width:${LW}px;height:${CARD_H}px;overflow:hidden;}
+@@ -104,10 +113,10 @@ const landscapeHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  .wordmark{width:286px;opacity:0.94;}
+ </style></head><body>
+ <div id="frame">
+- <img class="mark" src="${markData}">
++ ${MARK_IMG}
+  <div class="header"><p class="eyebrow">${EYEBROW || ''}</p><h1 class="title">${TITLE || ''}</h1></div>
+  <div class="card"><div id="stage"></div></div>
+- <div class="footer"><img class="wordmark" src="${logoInkData}"></div>
++ <div class="footer">${LOGO_IMG}</div>
+ </div>${scripts}<script>${mountFor(DURATION)}</script></body></html>`;
+ 
+ const reelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
+@@ -122,21 +131,21 @@ const reelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  .glow{position:absolute;left:50%;top:52%;width:1240px;height:1240px;transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(127,86,217,0.12), rgba(127,86,217,0) 60%);}
+  .mark{position:absolute;top:104px;left:50%;transform:translateX(-50%);width:132px;height:132px;}
+- .top{position:absolute;top:392px;left:0;right:0;text-align:center;padding:0 80px;}
++ .top{position:absolute;top:${392 - SHIFT_R}px;left:0;right:0;text-align:center;padding:0 80px;}
+  .eyebrow{color:#7F56D9;font-size:30px;font-weight:700;letter-spacing:9px;text-transform:uppercase;margin:0 0 20px;}
+  .title{color:#20273e;font-size:78px;font-weight:800;line-height:1.05;letter-spacing:-1.5px;margin:0;}
+- .card{position:absolute;left:0;top:660px;width:1080px;height:720px;overflow:hidden;}
++ .card{position:absolute;left:0;top:${660 - SHIFT_R}px;width:1080px;height:720px;overflow:hidden;}
+  .card svg{display:block;width:1080px;height:720px;}
+- .caption{position:absolute;top:1452px;left:0;right:0;text-align:center;color:#7a7296;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;}
++ .caption{position:absolute;top:${1452 - SHIFT_R}px;left:0;right:0;text-align:center;color:#7a7296;font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+  .logo{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);width:430px;opacity:0.95;}
+ </style></head><body>
+ <div id="reel">
+  <div class="glow"></div>
+- <img class="mark" src="${markData}">
++ ${MARK_IMG}
+  <div class="top"><p class="eyebrow">${EYEBROW || ''}</p><h1 class="title">${TITLE || ''}</h1></div>
+  <div class="card"><div id="stage"></div></div>
+  <div class="caption">${CAPTION || ''}</div>
+- <img class="logo" src="${logoInkData}">
++ ${REEL_LOGO_IMG}
+ </div>${scripts}<script>${mountFor(DURATION)}</script></body></html>`;
+ 
+ async function capture(html, { w, h, scale, sel, framesDir }) {
